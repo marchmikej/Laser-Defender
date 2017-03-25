@@ -1,16 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Player : MonoBehaviour {
+public class Enemy : MonoBehaviour {
 
-	public float speed;
+	public float speed = 3f;
 	public float borderBuffer = 1f;
 	public float laserSpeed;
 	float xmin;
 	float xmax;
 	float ymin;
 	float ymax;
-	public GameObject laserPreFab;
+	float ydirection;
 
 	// Use this for initialization
 	void Start () {
@@ -24,37 +24,27 @@ public class Player : MonoBehaviour {
 		xmax = rightmost.x -  borderBuffer;
 		ymin = lowermost.y + borderBuffer;
 		ymax = uppermost.y - borderBuffer;
+		ydirection = 1.0f;
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+	{
+		Random rnd = new Random ();
+		//float goX = (float)rnd.Next(-1, 1); 
+		//float goY = (float)rnd.Next(-1, 1); 
 
-		if( Input.GetKeyDown( KeyCode.Space ) )
-		{
-			GameObject laser = Instantiate(laserPreFab, transform.position, Quaternion.identity) as GameObject;
-			laser.GetComponent<Rigidbody2D>().velocity = new Vector3(0,laserSpeed,0);
-		}
+		//transform.position += new Vector3(Random.Range(-1.0f, 1.0f)*speed*Time.deltaTime, Random.Range(-1.0f, 1.0f)*speed*Time.deltaTime, 0);
+		transform.position += new Vector3(0, ydirection*speed*Time.deltaTime, 0);
 
-		// Using Time.deltaTime because it keeps speed consistent even if processor slows down.
-		// Proper term is frame rate independant speed
-		if( Input.GetKey( KeyCode.UpArrow ) )
-		{
-			transform.position += new Vector3(0, speed*Time.deltaTime, 0);
-		}
-		if( Input.GetKey( KeyCode.DownArrow ) )
-		{
-			transform.position += new Vector3(0, -speed*Time.deltaTime, 0);
-		}
-		if( Input.GetKey( KeyCode.RightArrow ) )
-		{
-			transform.position += new Vector3(speed*Time.deltaTime, 0, 0);
-		}
-		if( Input.GetKey( KeyCode.LeftArrow ) )
-		{
-			transform.position += new Vector3(-speed*Time.deltaTime, 0, 0);
+		//Update direction if needed.  Enemies only move up and down in this case
+		if (transform.position.y > ymax) {
+			ydirection = -1.0f;
+		} else if(transform.position.y < ymin) {
+			ydirection = 1.0f;
 		}
 
-		//restricts the player to the game space.  Clamp keeps value within min and max
+		//restricts the enemy to the game space.  Clamp keeps value within min and max
 		float newX = Mathf.Clamp(transform.position.x, xmin, xmax);
 		float newY = Mathf.Clamp(transform.position.y, ymin, ymax);
 		transform.position = new Vector3(newX, newY, transform.position.z);
@@ -62,9 +52,11 @@ public class Player : MonoBehaviour {
 
 	void OnCollisionEnter2D (Collision2D coll)
 	{
-		if (coll.gameObject.tag == "enemy") {
-			print("You hit the enemy so you should lose");
+		if (coll.gameObject.tag == "greenLaser") {
+			print("hit by greenLaser");
 			Destroy(gameObject);
 		}
+         //   coll.gameObject.SendMessage("ApplyDamage", 10);
+        print("WE had a collision");
     }
 }
